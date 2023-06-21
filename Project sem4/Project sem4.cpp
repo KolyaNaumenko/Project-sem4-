@@ -10,15 +10,20 @@ class Category;
 class Product {
 private:
     std::string name;
+    std::string description; // Опис товару
     double price;
     Category* category;
 
 public:
-    Product(const std::string& name, double price, Category* category)
-        : name(name), price(price), category(category) {}
+    Product(const std::string& name, const std::string& description, double price, Category* category)
+        : name(name), description(description), price(price), category(category) {}
 
     const std::string& getName() const {
         return name;
+    }
+
+    const std::string& getDescription() const {
+        return description;
     }
 
     double getPrice() const {
@@ -101,27 +106,27 @@ public:
 
 class Cart {
 protected:
-    std::map<Product*, int> products;  // Карта для отслеживания товаров и их количества
+    std::map<Product*, int> products;  // Карта для відстеження товарів та їх кількості
 
 public:
     virtual ~Cart() = default;
 
     virtual void addProduct(Product* product) {
         if (products.find(product) != products.end()) {
-            products[product] += 1;  // Увеличиваем количество товара
+            products[product] += 1;  // Збільшуємо кількість товару
         }
         else {
-            products[product] = 1;   // Добавляем товар в корзину
+            products[product] = 1;   // Додаємо товар у кошик
         }
     }
 
     virtual void removeProduct(Product* product) {
         if (products.find(product) != products.end()) {
             if (products[product] > 1) {
-                products[product] -= 1;  // Уменьшаем количество товара
+                products[product] -= 1;  // Зменшуємо кількість товару
             }
             else {
-                products.erase(product);  // Удаляем товар из корзины
+                products.erase(product);  // Видаляємо товар з кошика
             }
         }
     }
@@ -134,7 +139,7 @@ public:
             int quantity = item.second;
             double productPrice = product->getPrice() * quantity;
 
-            std::cout << "Product: " << product->getName() << ", Quantity: " << quantity << ", Price: " << productPrice << std::endl;
+            std::cout << "Product: " << product->getName() << ", Description: " << product->getDescription() << ", Quantity: " << quantity << ", Price: " << productPrice << std::endl;
             totalPrice += productPrice;
         }
         std::cout << "Total Price: " << totalPrice << std::endl;
@@ -156,7 +161,7 @@ public:
                 productPrice *= 0.9;  // Застосовуємо знижку 10% до кожного третього товару
             }
 
-            std::cout << "Product: " << product->getName() << ", Quantity: " << quantity << ", Price: " << productPrice << std::endl;
+            std::cout << "Product: " << product->getName() << ", Description: " << product->getDescription() << ", Quantity: " << quantity << ", Price: " << productPrice << std::endl;
             totalPrice += productPrice;
             count++;
         }
@@ -165,33 +170,33 @@ public:
 };
 
 int main() {
-    // Создание категорий
+    // Створення категорій
     Category* category1 = new Category("Electronics");
     Category* category2 = new Category("Clothing");
 
-    // Создание товаров
-    Product* product1 = new Product("Smartphone", 1000.0, category1);
-    Product* product2 = new Product("Laptop", 1500.0, category1);
-    Product* product3 = new Product("T-Shirt", 20.0, category2);
-    Product* product4 = new Product("Jeans", 50.0, category2);
+    // Створення товарів
+    Product* product1 = new Product("Smartphone", "A high-end smartphone with advanced features", 1000.0, category1);
+    Product* product2 = new Product("Laptop", "A powerful laptop for professional use", 1500.0, category1);
+    Product* product3 = new Product("T-Shirt", "A comfortable cotton t-shirt", 20.0, category2);
+    Product* product4 = new Product("Jeans", "Stylish jeans made from premium denim", 50.0, category2);
 
-    // Создание каталога
+    // Створення каталогу
     Catalog catalog;
     catalog.addCategory(category1);
     catalog.addCategory(category2);
 
-    // Добавление товаров в категории
+    // Додавання товарів до категорій
     catalog.addProductToCategory(product1, category1);
     catalog.addProductToCategory(product2, category1);
     catalog.addProductToCategory(product3, category2);
     catalog.addProductToCategory(product4, category2);
 
-    // Создание пользователей и корзин
+    // Створення користувачів та кошиків
     std::map<std::string, Cart*> users;
     users["Alice"] = new CartDecorator();
     users["Bob"] = new Cart();
 
-    // Добавление товаров в корзины
+    // Додавання товарів до кошиків
     users["Alice"]->addProduct(product1);
     users["Alice"]->addProduct(product3);
     users["Alice"]->addProduct(product2);
@@ -200,18 +205,18 @@ int main() {
     users["Bob"]->addProduct(product3);
     users["Bob"]->addProduct(product4);
 
-    // Вывод заказов и общей цены для каждого пользователя
+    // Виведення замовлень та загальної ціни для кожного користувача
     for (const auto& user : users) {
         std::cout << "User: " << user.first << std::endl;
         user.second->printCart();
         std::cout << std::endl;
     }
 
-    // Удаление товаров из корзин
+    // Видалення товарів з кошиків
     users["Alice"]->removeProduct(product1);
     users["Bob"]->removeProduct(product2);
 
-    // Вывод обновленных заказов и общей цены для каждого пользователя
+    // Виведення оновлених замовлень та загальної ціни для кожного користувача
     std::cout << "Updated Carts:" << std::endl;
     for (const auto& user : users) {
         std::cout << "User: " << user.first << std::endl;
@@ -219,11 +224,10 @@ int main() {
         std::cout << std::endl;
     }
 
-    // Освобождение памяти
+    // Звільнення пам'яті
     for (const auto& user : users) {
         delete user.second;
     }
-
 
     return 0;
 }
